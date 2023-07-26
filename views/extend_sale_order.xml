@@ -17,7 +17,7 @@
        <field name="binding_model_id" ref="sale.model_sale_order"/>
        <field name="state">code</field>
        <field name="code">
-           action = records.cretae_job_costing()
+           action = records.cretae_job_costing2()
        </field>
        </record>
 
