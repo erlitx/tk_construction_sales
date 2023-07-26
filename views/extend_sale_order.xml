@@ -1,0 +1,29 @@
+<odoo>
+    <data>
+        <!-- <record id="view_sale_order_form_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="payment_term_id" position="after">
+                <field name="new_field"/>
+            </field>
+        </field>
+        </record> -->
+
+       <record model="ir.actions.server" id="cretae_job_costing">
+       <field name="name">Create Job Costing</field>
+       <field name="model_id" ref="sale.model_sale_order"/>
+       <field name="binding_model_id" ref="sale.model_sale_order"/>
+       <field name="state">code</field>
+       <field name="code">
+           action = records.cretae_job_costing()
+       </field>
+       </record>
+
+
+
+
+    </data>
+</odoo>
+
