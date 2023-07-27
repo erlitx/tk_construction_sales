@@ -11,13 +11,16 @@
         </field>
         </record> -->
 
+
+        <!-- This record creates a Server Action to be displayed in 'Action' menu in 
+        Form view of 'sale.order' model records -->
        <record model="ir.actions.server" id="cretae_job_costing">
        <field name="name">Create Job Costing</field>
        <field name="model_id" ref="sale.model_sale_order"/>
        <field name="binding_model_id" ref="sale.model_sale_order"/>
        <field name="state">code</field>
        <field name="code">
-           action = records.cretae_job_costing2()
+           action = records.cretae_job_costing3()
        </field>
        </record>
 
