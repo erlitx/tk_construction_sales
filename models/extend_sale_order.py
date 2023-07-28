@@ -68,4 +68,5 @@ class CustomSaleOrder(models.Model):
                  # 'default_eng_labour_ids': [(0, 0, {'role_id': 1, 'cost': 77})]
                  }
                 }
+        
         return action

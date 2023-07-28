@@ -11,6 +11,18 @@
         </field>
         </record> -->
 
+        <record id="view_order_form_tk_construction" model="ir.ui.view">
+            <field name="name">Sale Order Job Costing Button</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                    <!-- Add your new button here -->
+                    <button name="cretae_job_costing" string="Create Job Costing" type="object" class="btn-secondary"/>
+                </xpath>
+            </field>
+        </record>
+
 
         <!-- This record creates a Server Action to be displayed in 'Action' menu in 
         Form view of 'sale.order' model records -->
