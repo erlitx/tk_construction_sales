@@ -9,86 +9,31 @@ _logger = logging.getLogger(__name__)
 class CustomSaleOrder(models.Model):
     _inherit = "sale.order"
 
-  #  new_field = fields.Char(string="New Field")
 
-
-    def cretae_job_costing2(self):
-        # Retrieves the ID of the 'sale.view_order_form' view from the database to call it in action later
-        job_costing_form_view_id = self.env.ref('tk_construction_management.job_costing_form_view').id
-
-        # Assuming you have 'material_ids' and 'default_qty' as follows:
-        material_ids = [50, 40]  # Replace with the actual list of IDs
-
-        # Get the list of sale order lines IDs
-        product_ids = self.order_line.product_id.ids
-        _logger.info(f'\n*****\n product_ids: {product_ids} \n*****')
-        default_qty = 7
-
-
-        product_qty_dict = {}
-
-        # Loop through each 'sale.order.line' record using the ids
-        # The result is product_qty_dict = {product_id: [product_uom_qty, price_unit]}
-        for order_line_id in product_ids:
-            order_line = self.env['sale.order.line'].browse(order_line_id)
-            _logger.info(f'\n*****\n order_line: {order_line} \n*****')
-            product_qty = order_line.product_uom_qty
-            _logger.info(f'\n*****\n product_qty: {product_qty} \n*****')
-            product_qty_dict[order_line_id] = product_qty
-            
-        _logger.info(f'\n*****\n product_qty_dict = {product_qty_dict} \n*****')
-
-        # Create a list of dictionaries with 'material_id' and 'qty'
-        material_lines = [{'material_id': material_id, 'qty': default_qty} for material_id in product_ids]
-
-        action = {
-            'type': 'ir.actions.act_window',
-            'res_model': 'job.costing', 
-            'view_mode': 'form',
-            'view_type': 'form',
-            'view_id': job_costing_form_view_id,
-            'target': 'current',
-            'context': {
-                'default_material_ids': [(0, 0, line) for line in material_lines], # a list of tuples to fill One2many filed 'material_ids'
-                'default_equipment_ids': [(0, 0, {'equipment_id': 50, 'qty': 77})], # a list of tuples to fill One2many filed 'equpment_ids'
-                'default_eng_labour_ids': [(0, 0, {'role_id': 1, 'cost': 77})]
-    }
-}
-        return action
-    
-
-    def cretae_job_costing3(self):
+    def cretae_job_costing(self):
         # Get the list of sale order lines IDs
         order_line_ids = self.order_line.ids
-        _logger.info(f'\n*****\n order_line_ids: {order_line_ids} \n*****')
 
-        # Make a dict in format:
-        # {product_id: {'qty': float, 'price_unit': float, 'is_material': bool, 
-        #                  'is_equipment': bool, 'is_expense_product': bool,...}}
+        material_lines = [] # a list to pass with a context to 'material_ids' O2M fieled of 'job.costing' model
+        equipment_lines = [] # a list to pass with a context to 'equipment_ids' O2M fieled of 'job.costing' model
 
-        material_lines = [] #this 
-        equipment_lines = []
-
+        # Loop over all 'sale.order.lines'
         for order_line_id in order_line_ids:
+            # A temporary dict with the values of each sale order line 
             product_qty_dict = {}
             order_line = self.env['sale.order.line'].browse(order_line_id)
-            _logger.info(f'\n*****\n order_line: {order_line} \n*****')
 
-            product_id = order_line.product_id.id
-            _logger.info(f'\n*****\n product_id: {product_id} \n*****')
-
-            product_qty = order_line.product_uom_qty
-            _logger.info(f'\n*****\n product_qty: {product_qty} \n*****')
-
-            price_unit = order_line.price_unit
-            price_reduce_taxinc = order_line.price_reduce_taxinc
-            _logger.info(f'\n*****\n price_unit: {price_unit} \n*****')
-
-            is_equipment = order_line.product_id.is_equipment
-            is_material = order_line.product_id.is_material
+            product_id = order_line.product_id.id                   # get a product ID
+            product_qty = order_line.product_uom_qty                # get a product qty from a line
+            price_unit = order_line.price_unit                      # get a non-taxed product unit price
+            price_reduce_taxinc = order_line.price_reduce_taxinc    # get a tax-incl product unit price
+            is_equipment = order_line.product_id.is_equipment       # get a product bool value of 'is_equipment'
+            is_material = order_line.product_id.is_material         # get a product bool value of 'is_material'
             is_expense_product = order_line.product_id.is_expense_product
-            detailed_type = order_line.product_id.detailed_type
+            detailed_type = order_line.product_id.detailed_type     # get a product value of 'Product Type' field
 
+            # If a product type is a 'product' and it's a 'material' put order.line values to a 
+            # material_lines list 
             if is_material and detailed_type == 'product':
                 product_qty_dict = {
                     'material_id': product_id, 'qty': product_qty, 
@@ -96,20 +41,20 @@ class CustomSaleOrder(models.Model):
                     }    
                 material_lines.append(product_qty_dict)
 
+            # If a product type is a 'product' and it's a 'equipment' put order.line values to a  
+            # equipment_lines list
             elif is_equipment and detailed_type == 'product':
                 product_qty_dict = {
                     'equipment_id': product_id, 'qty': product_qty, 
                     'cost': price_reduce_taxinc, 
                     }    
                 equipment_lines.append(product_qty_dict)
-                
 
-        _logger.info(f'\n*****\n  material_lines = {material_lines} \n*****')
-        _logger.info(f'\n*****\n  equipment_lines = {equipment_lines} \n*****')
-
-        # Retrieves the ID of the 'sale.view_order_form' view from the database to call it in action later
+        # Retrieves the ID of the 'sale.view_order_form' view from the database to call it in action
         job_costing_form_view_id = self.env.ref('tk_construction_management.job_costing_form_view').id
 
+        # This dict returned in Odoo with a function will open a new form view 'job_costing_form_view_id'
+        # and pass a context to fill in materials/equipment fields with values
         action = {
             'type': 'ir.actions.act_window',
             'res_model': 'job.costing', 
@@ -123,6 +68,4 @@ class CustomSaleOrder(models.Model):
                  # 'default_eng_labour_ids': [(0, 0, {'role_id': 1, 'cost': 77})]
                  }
                 }
-        print(f'========={[(0, 0, line) for line in material_lines]}')
-        print(f'========={[(line) for line in material_lines]}')
         return action
