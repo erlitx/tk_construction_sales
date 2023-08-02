@@ -49,6 +49,33 @@ class CustomSaleOrder(models.Model):
                     'cost': price_reduce_taxinc, 
                     }    
                 equipment_lines.append(product_qty_dict)
+        
+        # Create 'construction.type' default record
+        default_site_type = self.env['site.type'].search([('name', '=', 'New')])
+        # If records with name "New" exist use one, else create one and use it
+        if not default_site_type:
+            print(f'-----Create NEW--- {default_site_type[0].id}')
+            try:
+                construction_type = self.env['site.type'].create({'name': 'New'})
+            except Exception as e:
+                _logger.error(f'Error occurred while creating new "site.type" record: {e}')
+
+        print(f'----default_site_type[0].name = {default_site_type[0].name}')
+        print(f'----default_site_type[0].id = {default_site_type[0].id}')
+
+        # Check if a 'construction.site' record with the name equalt to Sale Order is exist
+        construction_site = self.env['construction.site'].search([('name', '=', self.name)])
+        print(f'----CHECK construction_site = {construction_site}')
+        if not construction_site:
+            # Create 'construction.site' record, use a default 'construction.type' record with name 'New'
+            vals = {'name': self.name, 'site_type_id': default_site_type[0].id}
+            try:
+                construction_site = self.env['construction.site'].create(vals)
+            except Exception as e:
+                _logger.error(f'Error occurred while creating new "construction.site" record: {e}')
+            print(f'----construction_site = {construction_site}')
+            print(f'----construction_site.id = {construction_site.id}')
+         
 
         # Retrieves the ID of the 'sale.view_order_form' view from the database to call it in action
         job_costing_form_view_id = self.env.ref('tk_construction_management.job_costing_form_view').id
@@ -65,8 +92,9 @@ class CustomSaleOrder(models.Model):
             'context': {
                 'default_material_ids': [(0, 0, line) for line in material_lines], # a list of tuples to fill One2many filed 'material_ids'
                 'default_equipment_ids': [(0, 0, line) for line in equipment_lines], # a list of tuples to fill One2many filed 'equpment_ids'
+                'default_site_id': construction_site[0].id,
                  # 'default_eng_labour_ids': [(0, 0, {'role_id': 1, 'cost': 77})]
                  }
                 }
-        
+        print(f'+-+-+- action = {action}')
         return action

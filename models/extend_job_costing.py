@@ -31,3 +31,12 @@ class CustomJobCosting(models.Model):
         result = super(CustomJobCosting, self).action_create_job_order()
         return result
     
+    # Get 'name' field value from context
+    @api.model
+    def create(self, vals):
+        if vals.get('name', ('New')) == ('New'):
+            context = self._context or {}
+            default_name = context.get('default_name')
+            vals['name'] = default_name or self.env['ir.sequence'].next_by_code('job.costing') or ('New')
+        res = super(CustomJobCosting, self).create(vals)
+        return res
