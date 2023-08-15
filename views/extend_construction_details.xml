@@ -1,0 +1,18 @@
+<odoo>
+    <data>
+
+        <record id="view_order_form_tk_construction_details" model="ir.ui.view">
+            <field name="name">Construction Details</field>
+            <field name="model">construction.details</field>
+            <field name="inherit_id" ref="tk_construction_management.construction_details_form_view"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='estimate_cost']" position="after">
+                    <field name="my_field" context="{'default': 123}" on_change="1"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
+
+

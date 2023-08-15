@@ -9,6 +9,10 @@ _logger = logging.getLogger(__name__)
 class CustomSaleOrder(models.Model):
     _inherit = "sale.order"
 
+    job_costing_id = fields.Many2one('job.costing', string='Job Costing')
+    job_costing_count = fields.Integer(compute='get_job_costing_count', string='Job Costing', readonly=True)
+
+    
 
     def cretae_job_costing(self):
         # Get the list of sale order lines IDs
@@ -93,8 +97,25 @@ class CustomSaleOrder(models.Model):
                 'default_material_ids': [(0, 0, line) for line in material_lines], # a list of tuples to fill One2many filed 'material_ids'
                 'default_equipment_ids': [(0, 0, line) for line in equipment_lines], # a list of tuples to fill One2many filed 'equpment_ids'
                 'default_site_id': construction_site[0].id,
+                'default_sale_order_id': self.id,
                  # 'default_eng_labour_ids': [(0, 0, {'role_id': 1, 'cost': 77})]
                  }
                 }
         print(f'+-+-+- action = {action}')
         return action
+    
+    # Open a view defined in 'action' = XML Id of 'tk_construction_salesfeature.action_view_job_costing'
+    def view_job_costing(self):
+        action = self.env.ref('tk_construction_salesfeature.action_view_job_costing').read()[0]
+        print(f'-----action  {action}')
+        action['domain'] = [('sale_order_id', '=', self.id)]
+        print(f'-----action domain {action}')
+        return action
+
+    # Counts a number of related 'job_costing' records
+    @api.depends('job_costing_id')
+    def get_job_costing_count(self):
+        self.ensure_one()
+        job_costing_ids = self.env['job.costing'].search([('sale_order_id', '=', self.id)]).ids
+        self.job_costing_count = len(job_costing_ids)
+

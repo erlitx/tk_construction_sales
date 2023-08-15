@@ -25,7 +25,10 @@
     'data': [
       #  'security/ir.model.access.csv',
         'views/extend_sale_order.xml',
+        'views/extend_job_costing.xml',
         'views/templates.xml',
+        'views/extend_construction_details.xml',
+        'views/form_view_construction_eqipment.xml',
     ],
 
 }

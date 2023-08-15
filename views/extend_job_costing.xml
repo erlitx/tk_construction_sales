@@ -1,0 +1,24 @@
+<odoo>
+    <data>
+        <record id="view_form_job_costing" model="ir.ui.view">
+            <field name="name">Job Costing extend view</field>
+            <field name="model">job.costing</field>
+            <field name="inherit_id" ref="tk_construction_management.job_costing_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='site_id']" position="after">
+                    <field name="sale_order_id"/>
+                </xpath>
+            </field>
+        </record>
+
+
+<!-- A view to display job.costing records related to sale.order record -->
+        <record id="action_view_job_costing" model="ir.actions.act_window">
+            <field name="name">Job Costing</field>
+            <field name="res_model">job.costing</field>
+            <field name="view_mode">tree,form</field>
+            <!-- <field name="domain">[('sale_order_id', '=', active_id)]</field> -->
+            <!-- <field name="context">{'search_default_sale_order_id': active_id}</field> -->
+        </record>
+    </data>
+</odoo>

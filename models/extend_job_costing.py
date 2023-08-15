@@ -4,7 +4,7 @@ from odoo import models, fields, api
 class CustomJobCosting(models.Model):
     _inherit = "job.costing"
 
-    # new_field = fields.Char(string="New Field")
+    sale_order_id = fields.Many2one('sale.order', string='Sale Order')
 
 
     # Override the default create method
@@ -38,5 +38,24 @@ class CustomJobCosting(models.Model):
             context = self._context or {}
             default_name = context.get('default_name')
             vals['name'] = default_name or self.env['ir.sequence'].next_by_code('job.costing') or ('New')
+        
+        # Clear context
+        context = self.env.context
+        print(f'-----context = {context}')
+        # Get the current context as a mutable dictionary
+        context = dict(self.env.context)
+
+        if 'default_material_ids' in context:
+            context.pop('default_material_ids')
+        if 'default_equipment_ids' in context:
+            context.pop('default_equipment_ids')
+        if 'default_name' in context:
+            context.pop('default_name')
+        if 'default_site_id' in context:
+            context.pop('default_site_id')
+
+        self = self.with_context(context)
+        print(f'-----context = {context}')
         res = super(CustomJobCosting, self).create(vals)
+
         return res

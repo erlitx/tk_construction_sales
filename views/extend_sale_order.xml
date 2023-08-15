@@ -20,6 +20,18 @@
                     <!-- Add your new button here -->
                     <button name="cretae_job_costing" string="Create Job Costing" type="object" class="btn-secondary"/>
                 </xpath>
+                <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <field name="job_costing_id"/>
+                </xpath>
+                <xpath expr="//div[@name='button_box']" position="inside">
+                <!-- Add a smart button -->
+                    <button type="object" name="view_job_costing" class="oe_stat_button" icon="fa-truck">
+                        <!-- A field to be displaied in smart button-->
+                        <field name="job_costing_id" widget="statinfo" string="Job Costing" options="{'count': True}" invisible="1"/>
+                        <!-- A field to be displaied in smart button-->
+                        <field name="job_costing_count" widget="statinfo" string="Job Costing" invisible="0"/>
+                    </button>
+                </xpath>
             </field>
         </record>
 
@@ -41,4 +53,3 @@
 
     </data>
 </odoo>
-
